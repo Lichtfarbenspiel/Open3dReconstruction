@@ -18,7 +18,7 @@
 Mit folgendem Konsolenbefehl müssen die einzelnen Frames einer Videoaufnahme (.mkv) extrahiert werden:
 
 ```
-python azure_kinect_mkv_reader.py --input record.mkv --output frames
+python azure_kinect_mkv_reader.py --input kinect_recording.mkv --output frames
 ```
 
 Hierbei wird ein Verzeichnis "frames" mit den Unterverzeichnissen "color" und "depth" erstellt. In welchen die Farbwerte und Tiefenkarten der einzelnen Frames gespeichert werden.
