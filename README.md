@@ -17,20 +17,30 @@
 # Anleitung zur Nutzung des Programms
 Mit folgendem Konsolenbefehl müssen die einzelnen Frames einer Videoaufnahme (.mkv) extrahiert werden:
 
-```python azure_kinect_mkv_reader.py --input record.mkv --output frames```
+```
+python azure_kinect_mkv_reader.py --input record.mkv --output frames
+```
 
 Hierbei wird ein Verzeichnis "frames" mit den Unterverzeichnissen "color" und "depth" erstellt. In welchen die Farbwerte und Tiefenkarten der einzelnen Frames gespeichert werden.
 
 Anschließend müssen die folgenden vier Befehle nacheinander in der Konsole ausgeführt werden:
 
 
-```python run_system.py "config.json" --make```
+```
+python run_system.py "config.json" --make
+```
 
-```python run_system.py "config.json" --register```
+```
+python run_system.py "config.json" --register
+```
 
-```python run_system.py "config.json" --refine```
+```
+python run_system.py "config.json" --refine
+```
 
-```python run_system.py "config.json" --integrate```
+```
+python run_system.py "config.json" --integrate
+```
 
 ## Schritt 1 --make
 Hier werden Fragmente erstellt, wobei lokale geometrische Oberflächen gebaut werden, aus kurzen Untersequenzen der Eingangssequenz. Dazu wird RGBD-Odometrie, Mehrwegregistrierung und RGBD-Integration verwendet.
@@ -49,7 +59,9 @@ Für die initiale Registrierung wird bei aufeinanderfolgenden Sequenzen ICP-Regi
 Für die Mehrwegregistrierung wird, wie bei Schritt 1, ein Pose Graph erstellt und optimiert, wobei hier für jede Subsequenz ein Knoten erstellt wird.
 
 ## Schritt 3 --refine
-Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet.
+Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet. Bei der ICP-Registrierung gibt es  optional die "Point to Plane" oder die "Color" ICP-Methode zur Auswahl. Letzteres wird empfohlen, da hier durch die Verwendung der Farbinformationen Abweichungen verhindert werden können.
+
+Bei der Mehrwegregistrierung wird erneut ein Pose Graph für jedes der Fragmente erstellt und anschließend optimiert.
 
 ## Schritt 4 --integrate
 Integrieren der RGBD-Bilder, um ein 3D-Objekt für die Szene zu erstellen. Dazu wird RGBD-Integration verwendet.
@@ -57,20 +69,13 @@ Integrieren der RGBD-Bilder, um ein 3D-Objekt für die Szene zu erstellen. Dazu 
 Für die RGBD-Integration werden der Pose Graph der Szene und die Pose Graphs der Fragmente ausgelesen um so die Posentransformation für jedes Bild berechnen zu können und schließlich alle Bilder in eine Punktwolke zusammenzuführen.
 
 ## Begriffserklärungen
-### RGBD-Odometrie:
-Finden der Kamerabewegung zwischen zwei aufeinanderfolgenden Bildern.
-
-### Mehrwegregistrierung:
-Ausrichten mehrerer Geometrieteile in einem globalen Raum. Open3D nutzt dazu Pose Graph Optimazation.
-
-### RGBD-Integration:
-Berechnen eines 3D-Objekts aus RGBD-Bildern.
-
-### Globale Registrierung:
-Ausrichtungsalgorithmen, die keine initiale Ausrichtung benötigen und eine grobe Ausrichtung berechnen.
-
-### Iterative Closest Point (ICP)-Registrierung:
-Iterativ werden Transformationen berechnet, die die nächsten Punkte immer näher zueinander bringen. Hier spricht man von lokaler Registrierung.
+|Begriff          |Erklärung    |
+|-----------------|-------------|
+|RGBD-Odometrie   |Finden der Kamerabewegung zwischen zwei aufeinanderfolgenden Bildern.|
+|Mehrwegregistrierung|Ausrichten mehrerer Geometrieteile in einem globalen Raum. Open3D nutzt dazu Pose Graph Optimazation.|
+|RGBD-Integration|Berechnen eines 3D-Objekts aus RGBD-Bildern.|
+|Globale Registrierung|Ausrichtungsalgorithmen, die keine initiale Ausrichtung benötigen und eine grobe Ausrichtung berechnen.|
+|Iterative Closest Point (ICP)-Registrierung|Iterativ werden Transformationen berechnet, die die nächsten Punkte immer näher zueinander bringen. Hier spricht man von lokaler Registrierung.|
 
 # Referenzen
 [Open3d Reconstruction system](http://www.open3d.org/docs/latest/tutorial/ReconstructionSystem/index.html)
