@@ -1,4 +1,17 @@
 # 3D Rekonstruktion mit einer RGBD-Sequenz
+<details>
+  <summary>Inhalt</summary>
+  <ol>
+    <li><a href="#schritt-1">Schritt 1</a></li>
+    <li><a href="#schritt-2">Schritt 2</a></li>
+    <li><a href="#schritt-3">Schritt 3</a></li>
+    <li><a href="#schritt-4">Schritt 4</a></li>
+    <li><a href="#begriffserklärungen">Begriffserklärungen</a></li>
+    <li><a href="#referenzen">Referenzen</a></li>
+    <li><a href="#verwendete-module">Verwendete Module</a></li>
+  </ol>
+</details>
+
 ## Schritt 1
 Fragmente erstellen. Lokale geometrische Oberflächen (Meshes) werden gebaut aus kurzen Untersequenzen der Eingangssequenz. Dazu wird RGBD-Odometrie, Mehrwegregistrierung und RGBD-Integration verwendet.
 
@@ -30,3 +43,15 @@ Ausrichtungsalgorithmen, die keine initiale Ausrichtung benötigen und eine grob
 
 ### ICP-Registrierung:
 Iterative Closest Point. Iterativ werden Transformationen berechnet, die die nächsten Punkte immer näher zueinander bringen. (Lokal)
+
+# Referenzen
+[Open3d Reconstruction system](http://www.open3d.org/docs/latest/tutorial/ReconstructionSystem/index.html)
+
+# Verwendete Module
+|Modul          |Version    |
+|---------------|-----------|
+|Python         |3.9        |
+|opencv-python  |4.5.5.64   |
+|Open3D         |0.15       |
+|matplotlib     |           |
+|joblib         |           |
