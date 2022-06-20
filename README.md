@@ -61,9 +61,9 @@ Für die Mehrwegregistrierung wird, wie bei Schritt 1, ein Pose Graph erstellt u
 ## Schritt 3 --refine
 Hier wird die Registrierung aus Schritt 2 verfeinert. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet.
 
-Bei der ICP-Registrierung gibt es optional die "Point to Point, die "Point to Plane" oder die "Color" ICP-Methode zur Auswahl. Letzteres wird empfohlen, da hier durch die Verwendung der Farbinformationen Abweichungen verhindert werden können.
+Auf Basis der Registrierung aus Schritt 2 werden die Punktewolken der Subsequenzen durch ICP-Registrierung nochmals nähergerückt. Danach wird wieder die Mehrwegregistrierung für die Subsequenzen angewandt.
 
-Bei der Mehrwegregistrierung wird erneut ein Pose Graph für jedes der Fragmente erstellt und anschließend optimiert.
+Bei der ICP-Registrierung gibt es optional die "Point to Point, die "Point to Plane" oder die "Color" ICP-Methode zur Auswahl. Letzteres wird empfohlen, da hier durch die Verwendung der Farbinformationen Abweichungen verhindert werden können.
 
 ## Schritt 4 --integrate
 Integrieren der RGBD-Bilder, um ein 3D-Objekt für die Szene zu erstellen. Dazu wird RGBD-Integration verwendet.
