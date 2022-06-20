@@ -59,7 +59,7 @@ Für die initiale Registrierung wird bei aufeinanderfolgenden Sequenzen ICP-Regi
 Für die Mehrwegregistrierung wird, wie bei Schritt 1, ein Pose Graph erstellt und optimiert, wobei hier für jede Subsequenz ein Knoten erstellt wird.
 
 ## Schritt 3 --refine
-Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet. Bei der ICP-Registrierung gibt es  optional die "Point to Plane" oder die "Color" ICP-Methode zur Auswahl. Letzteres wird empfohlen, da hier durch die Verwendung der Farbinformationen Abweichungen verhindert werden können.
+Hier wird die Registrierung aus Schritt 2 verfeinert. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet. Bei der ICP-Registrierung gibt es  optional die "Point to Plane" oder die "Color" ICP-Methode zur Auswahl. Letzteres wird empfohlen, da hier durch die Verwendung der Farbinformationen Abweichungen verhindert werden können.
 
 Bei der Mehrwegregistrierung wird erneut ein Pose Graph für jedes der Fragmente erstellt und anschließend optimiert.
 
