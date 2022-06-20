@@ -15,7 +15,16 @@
 
 
 # Anleitung zur Nutzung des Programms
-Mit folgendem Konsolenbefehl müssen die einzelnen Frames einer Videoaufnahme (.mkv) extrahiert werden:
+
+Die 3D-Rekonstruktion kann über [run.bat](run.bat) mit folgendem Befehl durchgeführt werden:
+
+```
+.\run "config.json"
+```
+
+Alternative Vorgehensweise:
+
+Mit dem folgendem Konsolenbefehl müssen die einzelnen Frames einer Videoaufnahme (.mkv) extrahiert werden:
 
 ```
 python azure_kinect_mkv_reader.py --input kinect_recording.mkv --output frames
