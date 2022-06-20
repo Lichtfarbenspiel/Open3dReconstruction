@@ -1,17 +1,68 @@
+# ----------------------------------------------------------------------------
+# -                        Open3D: www.open3d.org                            -
+# ----------------------------------------------------------------------------
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2021 www.open3d.org
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+# ----------------------------------------------------------------------------
 
-import open3d as o3d
-from os.path import exists, isfile, join, splitext, dirname, basename
-import numpy as np
-import json
-import os
-import shutil
-import cv2 as cv
+# examples/python/reconstruction_system/make_fragments.py
+
 import math
+import os, sys
+import numpy as np
+import open3d as o3d
+
+pyexample_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(pyexample_path)
+
+from open3d_example import join, make_clean_folder, get_rgbd_file_lists, initialize_opencv
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from optimize_posegraph import optimize_posegraph_for_fragment
+
+# check opencv python package
+with_opencv = initialize_opencv()
+if with_opencv:
+    from opencv_pose_estimation import pose_estimation
+
+
+def read_rgbd_image(color_file, depth_file, convert_rgb_to_intensity, config):
+    color = o3d.io.read_image(color_file)
+    depth = o3d.io.read_image(depth_file)
+    rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
+        color,
+        depth,
+        depth_scale=config["depth_scale"],
+        depth_trunc=config["max_depth"],
+        convert_rgb_to_intensity=convert_rgb_to_intensity)
+    return rgbd_image
+
 
 def register_one_rgbd_pair(s, t, color_files, depth_files, intrinsic,
                            with_opencv, config):
-    source_rgbd_image = read_rgbd_image(color_files[s], depth_files[s])
-    target_rgbd_image = read_rgbd_image(color_files[t], depth_files[t])
+    source_rgbd_image = read_rgbd_image(color_files[s], depth_files[s], True,
+                                        config)
+    target_rgbd_image = read_rgbd_image(color_files[t], depth_files[t], True,
+                                        config)
 
     option = o3d.pipelines.odometry.OdometryOption()
     option.max_depth_diff = config["max_depth_diff"]
@@ -34,7 +85,8 @@ def register_one_rgbd_pair(s, t, color_files, depth_files, intrinsic,
             source_rgbd_image, target_rgbd_image, intrinsic, odo_init,
             o3d.pipelines.odometry.RGBDOdometryJacobianFromHybridTerm(), option)
         return [success, trans, info]
-    
+
+
 def make_posegraph_for_fragment(path_dataset, sid, eid, color_files,
                                 depth_files, fragment_id, n_fragments,
                                 intrinsic, with_opencv, config):
@@ -82,16 +134,6 @@ def make_posegraph_for_fragment(path_dataset, sid, eid, color_files,
         join(path_dataset, config["template_fragment_posegraph"] % fragment_id),
         pose_graph)
 
-def optimize_posegraph_for_fragment(path_dataset, fragment_id, config):
-    pose_graph_name = join(path_dataset,
-                           config["template_fragment_posegraph"] % fragment_id)
-    pose_graph_optimized_name = join(
-        path_dataset,
-        config["template_fragment_posegraph_optimized"] % fragment_id)
-    run_posegraph_optimization(pose_graph_name, pose_graph_optimized_name,
-            max_correspondence_distance = config["max_depth_diff"],
-            preference_loop_closure = \
-            config["preference_loop_closure_odometry"])
 
 def integrate_rgb_frames_for_fragment(color_files, depth_files, fragment_id,
                                       n_fragments, pose_graph_name, intrinsic,
@@ -105,60 +147,50 @@ def integrate_rgb_frames_for_fragment(color_files, depth_files, fragment_id,
         i_abs = fragment_id * config['n_frames_per_fragment'] + i
         print(
             "Fragment %03d / %03d :: integrate rgbd frame %d (%d of %d)." %
-            (fn_filesread_rgbd_imageragment_id, n_fragments - 1, i_abs, i + 1, len(pose_graph.nodes)))
-        rgbd = read_rgbd_image(color_files[i_abs], depth_files[i_abs])
+            (fragment_id, n_fragments - 1, i_abs, i + 1, len(pose_graph.nodes)))
+        rgbd = read_rgbd_image(color_files[i_abs], depth_files[i_abs], False,
+                               config)
         pose = pose_graph.nodes[i].pose
         volume.integrate(rgbd, intrinsic, np.linalg.inv(pose))
     mesh = volume.extract_triangle_mesh()
     mesh.compute_vertex_normals()
     return mesh
 
-def process_single_fragment(fragment_id, color_files, depth_files,
-                                    n_files, n_fragments, config):
-    path_dataset = config["path_dataset"]
 
-    intrinsic = json.loads(open(config["path_intrinsic"], "r").read())
-    n_frames_per_fragment = config["n_frames_per_fragment"]
+def make_pointcloud_for_fragment(path_dataset, color_files, depth_files,
+                                 fragment_id, n_fragments, intrinsic, config):
+    mesh = integrate_rgb_frames_for_fragment(
+        color_files, depth_files, fragment_id, n_fragments,
+        join(path_dataset,
+             config["template_fragment_posegraph_optimized"] % fragment_id),
+        intrinsic, config)
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = mesh.vertices
+    pcd.colors = mesh.vertex_colors
+    pcd_name = join(path_dataset,
+                    config["template_fragment_pointcloud"] % fragment_id)
+    o3d.io.write_point_cloud(pcd_name, pcd, False, True)
 
-    make_posegraph_for_fragment(path_dataset, n_frames_per_fragment * fragment_id, n_frames_per_fragment * (fragment_id + 1), color_files,
+
+def process_single_fragment(fragment_id, color_files, depth_files, n_files,
+                            n_fragments, config):
+    if config["path_intrinsic"]:
+        intrinsic = o3d.io.read_pinhole_camera_intrinsic(
+            config["path_intrinsic"])
+    else:
+        intrinsic = o3d.camera.PinholeCameraIntrinsic(
+            o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
+    sid = fragment_id * config['n_frames_per_fragment']
+    eid = min(sid + config['n_frames_per_fragment'], n_files)
+
+    make_posegraph_for_fragment(config["path_dataset"], sid, eid, color_files,
                                 depth_files, fragment_id, n_fragments,
-                                intrinsic, True, config)
-    optimize_posegraph_for_fragment(path_dataset, fragment_id, config)
-    
-    pose_graph_name = join(
-        path_dataset,
-        config["template_fragment_posegraph_optimized"] % fragment_id)
+                                intrinsic, with_opencv, config)
+    optimize_posegraph_for_fragment(config["path_dataset"], fragment_id, config)
+    make_pointcloud_for_fragment(config["path_dataset"], color_files,
+                                 depth_files, fragment_id, n_fragments,
+                                 intrinsic, config)
 
-    integrate_rgb_frames_for_fragment(color_files, depth_files, fragment_id,
-                                      n_fragments, pose_graph_name, intrinsic,
-                                      config)
-
-def make_clean_folder(folder):
-    if os.path.exists(folder):
-        try: 
-            shutil.rmtree(folder)
-        except OSError as e:
-            print("Error: %s-%s" %(e.filename, e.strerror))
-        
-def get_rgbd_file_lists(path):
-    color_files = []
-    depth_files = []
-
-    for file_name in os.listdir(join(path, "color")):
-        color_files.append(os.path.join(path, "color", file_name))
-        depth_files.append(os.path.join(path, "depth", file_name.replace(".jpg", ".png", 1)))
-
-    return color_files, depth_files
-
-def read_rgbd_image(color_file, depth_file):
-
-    color_raw = o3d.io.read_image(color_file)
-    depth_raw = o3d.io.read_image(depth_file)
-    rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
-        color_raw, depth_raw)
-    # rgbd_image = np.asarray(rgbd_image)
-    print("DEBUG", np.asarray(rgbd_image))
-    return rgbd_image
 
 def run(config):
 
@@ -182,5 +214,3 @@ def run(config):
         for fragment_id in range(n_fragments):
             process_single_fragment(fragment_id, color_files, depth_files,
                                     n_files, n_fragments, config)
-
-run(json.loads(open("config.json", "r").read()))
