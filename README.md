@@ -44,6 +44,10 @@ Für die RGBD-Integration werden alle Knoten des Pose Graphs durchlaufen und der
 ## Schritt 2 --register
 Fragmente registrieren. Die Fragmente werden ausgerichtet, um Loop Closure zu erkennen (Bewegungsschleifen der Kamera, bei denen der Ausgangspunkt gleich dem Eingangspunkt ist). Dazu wird globale Registrierung, ICP-Registrierung und Mehrwegregistrierung verwendet.
 
+Für die initiale Registrierung wird bei aufeinanderfolgenden Sequenzen ICP-Registrierung verwendet und ansonsten wird RANSAC oder Fast Global Registration verwendet.
+
+Für die Mehrwegregistrierung wird, wie bei Schritt 1, ein Pose Graph erstellt und optimiert, wobei hier für jede Subsequenz ein Knoten erstellt wird.
+
 ## Schritt 3 --refine
 Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet.
 
