@@ -33,7 +33,7 @@ Anschließend müssen die folgenden vier Befehle nacheinander in der Konsole aus
 ```python run_system.py "config.json" --integrate```
 
 ## Schritt 1 --make
-Fragmente erstellen. Lokale geometrische Oberflächen (Meshes) werden gebaut aus kurzen Untersequenzen der Eingangssequenz. Dazu wird RGBD-Odometrie, Mehrwegregistrierung und RGBD-Integration verwendet.
+Hier werden Fragmente erstellt, wobei lokale geometrische Oberflächen gebaut werden, aus kurzen Untersequenzen der Eingangssequenz. Dazu wird RGBD-Odometrie, Mehrwegregistrierung und RGBD-Integration verwendet.
 
 Für die RGBD-Odometrie wird bei Bildern, die nicht direkt aufeinander folgen, eine Pose Estimation berechnet als initiale Transformationsmatrix. Bei der Pose Estimation werden Feature Points gefunden und mit RANSAC wird eine grobe Ausrichtung für die Punkte zueinander berechnet.
 
@@ -42,7 +42,7 @@ Für die Mehrwegregistrierung wird ein Pose Graph aufgebaut. Dabei wird für jed
 Für die RGBD-Integration werden alle Knoten des Pose Graphs durchlaufen und deren Posentransformation ausgelesen, um die Bilder relativ zum Startbild richtig auszurichten und schließlich in eine 3D-Objekt zu integrieren.
 
 ## Schritt 2 --register
-Fragmente registrieren. Die Fragmente werden ausgerichtet, um Loop Closure zu erkennen (Bewegungsschleifen der Kamera, bei denen der Ausgangspunkt gleich dem Eingangspunkt ist). Dazu wird globale Registrierung, ICP-Registrierung und Mehrwegregistrierung verwendet.
+Das Registrieren der Fragmente. Das heist die Fragmente werden ausgerichtet, um Loop Closure zu erkennen (Bewegungsschleifen der Kamera, bei denen der Ausgangspunkt gleich dem Eingangspunkt ist). Dazu wird globale Registrierung, ICP-Registrierung und Mehrwegregistrierung verwendet.
 
 Für die initiale Registrierung wird bei aufeinanderfolgenden Sequenzen ICP-Registrierung verwendet und ansonsten wird RANSAC oder Fast Global Registration verwendet.
 
@@ -52,7 +52,7 @@ Für die Mehrwegregistrierung wird, wie bei Schritt 1, ein Pose Graph erstellt u
 Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung verwendet.
 
 ## Schritt 4 --integrate
-Szene integrieren. Integrieren der RGBD-Bilder, um ein Mesh für die Szene zu erstellen. Dazu wird RGBD-Integration verwendet.
+Integrieren der RGBD-Bilder, um ein 3D-Objekt für die Szene zu erstellen. Dazu wird RGBD-Integration verwendet.
 
 Für die RGBD-Integration werden der Pose Graph der Szene und die Pose Graphs der Fragmente ausgelesen um so die Posentransformation für jedes Bild berechnen zu können und schließlich alle Bilder in eine Punktwolke zusammenzuführen.
 
