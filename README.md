@@ -54,6 +54,8 @@ Registrierung verfeinern. Dazu wird ICP-Registrierung und Mehrwegregistrierung v
 ## Schritt 4 --integrate
 Szene integrieren. Integrieren der RGBD-Bilder, um ein Mesh für die Szene zu erstellen. Dazu wird RGBD-Integration verwendet.
 
+Für die RGBD-Integration werden der Pose Graph der Szene und die Pose Graphs der Fragmente ausgelesen um so die Posentransformation für jedes Bild berechnen zu können und schließlich alle Bilder in eine Punktwolke zusammenzuführen.
+
 ## Begriffserklärungen
 ### RGBD-Odometrie:
 Finden der Kamerabewegung zwischen zwei aufeinanderfolgenden Bildern.
