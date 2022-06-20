@@ -17,7 +17,9 @@ Fragmente erstellen. Lokale geometrische Oberflächen (Meshes) werden gebaut aus
 
 Für die RGBD-Odometrie wird bei Bildern, die nicht direkt aufeinander folgen, eine Pose Estimation berechnet als initiale Transformationsmatrix. Bei der Pose Estimation werden Feature Points gefunden und mit RANSAC wird eine grobe Ausrichtung für die Punkte zueinander berechnet.
 
-Für die Mehrwegregistrierung wird ein Pose Graph aufgebaut. Dabei wird für jedes Bild ein Knoten eingefügt mit der Transformation, die die Kameraausrichtung zurück zur Ursprungsausrichtung bringt. Zusätzlich wird jeder Knoten mit jedem anderen Knoten über eine Kante verbunden mit der Transformation, die die Kameraausrichtung von einem Bild zum nächsten bringt und einem Wahrheitswert, der Aussagt, ob es einen großen Fehler geben kann oder nicht. Der Wahrheitswert wird auf Wahr gesetzt, wenn die Kante einen Knoten mit dem Folgeknoten verbindet (nach Bildfolge in der Sequenz). Schließlich wird
+Für die Mehrwegregistrierung wird ein Pose Graph aufgebaut. Dabei wird für jedes Bild ein Knoten eingefügt mit der Transformation, die die Kameraausrichtung zurück zur Ursprungsausrichtung bringt. Zusätzlich wird jeder Knoten mit jedem anderen Knoten über eine Kante verbunden mit der Transformation, die die Kameraausrichtung von einem Bild zum nächsten bringt und einem Wahrheitswert, der Aussagt, ob es einen großen Fehler geben kann oder nicht. Der Wahrheitswert wird auf Wahr gesetzt, wenn die Kante einen Knoten mit dem Folgeknoten verbindet (nach Bildfolge in der Sequenz). Schließlich wird der Pose Graph durch Mehrwegregistrierung optimiert. Hier wird in Open3D Global Optimization angewandt.
+
+Für die RGBD-Integration werden alle Knoten des Pose Graphs durchlaufen und deren Posentransformation ausgelesen, um die Bilder relativ zum Startbild richtig auszurichten und schließlich in eine 3D-Objekt zu integrieren.
 
 ## Schritt 2
 Fragmente registrieren. Die Fragmente werden ausgerichtet, um Loop Closure zu erkennen (Bewegungsschleifen der Kamera, bei denen der Ausgangspunkt gleich dem Eingangspunkt ist). Dazu wird globale Registrierung, ICP-Registrierung und Mehrwegregistrierung verwendet.
@@ -36,13 +38,13 @@ Finden der Kamerabewegung zwischen zwei aufeinanderfolgenden Bildern.
 Ausrichten mehrerer Geometrieteile in einem globalen Raum. Open3D nutzt dazu Pose Graph Optimazation.
 
 ### RGBD-Integration:
-Berechnen eines Meshes aus RGBD-Bildern.
+Berechnen eines 3D-Objekts aus RGBD-Bildern.
 
 ### Globale Registrierung:
 Ausrichtungsalgorithmen, die keine initiale Ausrichtung benötigen und eine grobe Ausrichtung berechnen.
 
-### ICP-Registrierung:
-Iterative Closest Point. Iterativ werden Transformationen berechnet, die die nächsten Punkte immer näher zueinander bringen. (Lokal)
+### Iterative Closest Point (ICP)-Registrierung:
+Iterativ werden Transformationen berechnet, die die nächsten Punkte immer näher zueinander bringen. Hier spricht man von lokaler Registrierung.
 
 # Referenzen
 [Open3d Reconstruction system](http://www.open3d.org/docs/latest/tutorial/ReconstructionSystem/index.html)
